@@ -12,13 +12,13 @@ nodes = {}
 
 
 def find_object(obj):
-    _sql = 'MATCH (n:{}) WHERE n.name="{}" RETURN count(n)'.format(obj['key'], obj['name'])
+    _sql = u'MATCH (n:{}) WHERE n.name="{}" RETURN count(n)'.format(obj['key'], obj['name'])
     _ret = graph.run(_sql).data()
     return _ret[0]['count(n)']
 
 
 def get_object(obj):
-    _sql = 'MATCH (n:{}) WHERE n.name="{}" RETURN n'.format(obj['key'], obj['name'])
+    _sql = u'MATCH (n:{}) WHERE n.name="{}" RETURN n'.format(obj['key'], obj['name'])
     _ret = graph.run(_sql).data()
     return _ret[0]['n']
 
@@ -40,14 +40,14 @@ def add_entity(entity):
 
     # Add this Event
     if find_object({'key': "Event", 'name': entity['RID']}) < 1:
-
+        # 新增舆情
         _event = Node("Event", name=u"%s" % entity['RID'])
         graph.create(_event)
         # Connect Object with E
         _link = Relationship(obj_nodes[entity['Node']], "ir", _event)
         graph.create(_link)
 
-        print("Add: [{}][{}]".format(entity['Node'], entity['IR_URLTITLE']))
+        print(u"Add: [{}][{}]".format(entity['Node'], entity['IR_URLTITLE']))
         values = {
             'Date': 'IR_URLTIME',
             'Title': 'IR_URLTITLE',
@@ -62,10 +62,8 @@ def add_entity(entity):
             'KeyWord': 'SY_KEYWORDS',
                   }
         for _item in values:
-
             if _item not in nodes:
                 nodes[_item] = {}
-
             _v = values[_item]
             _key = entity[_v].split(';')
             for _k in _key:
@@ -73,11 +71,21 @@ def add_entity(entity):
                 _k = _k.replace(" ", '')
                 if len(_k) == 0:
                     continue
-                if _k not in nodes[_item]:
-                    print(">\t[{}][{}]".format(_item, _k))
+
+                # 属性是否存在
+                # TODO: 存在同名属性
+                if find_object({'key': _item, 'name': _k}) < 1:
+                    # 新增属性
                     _node = Node(_item, name=u"%s" % _k)
                     graph.create(_node)
+                else:
+                    _node = get_object({'key': _item, 'name': _k})
+
+                if _k not in nodes[_item]:
+                    print(u">\t[{}][{}]".format(_item, _k))
                     nodes[_item][_k] = _node
+
+                # 建立属性与“舆情”的链接
                 _link = Relationship(_event, _item, nodes[_item][_k])
                 graph.create(_link)
 
