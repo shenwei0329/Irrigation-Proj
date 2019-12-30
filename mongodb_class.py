@@ -13,8 +13,6 @@ from pymongo import MongoClient
 import time
 from bson.objectid import ObjectId
 import datetime
-import ConfigParser
-# import handler
 
 
 class mongoDB:

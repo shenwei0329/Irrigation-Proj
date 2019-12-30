@@ -5,6 +5,7 @@ import sys, os, time
 import urllib
 import json
 import mongodb_class
+import put2db
 
 #
 # API
@@ -144,7 +145,6 @@ type_info = [
             ]
 
 
-
 def main():
 
     db = mongodb_class.mongoDB()
@@ -173,28 +173,23 @@ def main():
                     _cnt = db.handler("river", "find", _sql).count()
                     if _cnt == 0:
 
+                        _u['Node'] = _item
                         db.handler("river", "update", _u, _u)
 
-                        print(u"\t> RID: {}".format(_u["RID"]))
-                        print(u"\t> UrlTime: {}".format(_u["IR_URLTIME"]))
-                        print(u"\t> UrlTitle: {}".format(_u["IR_URLTITLE"]))
-                        print(u"\t> Url: {}".format(_u["IR_URLNAME"]))
-                        print(u"\t> SiteName: {}".format(_u["IR_SITENAME"]))
-                        print(u"\t> Authors: {}".format(_u["IR_AUTHORS"]))
-                        print(u"\t> Channel: {}".format(_u["IR_CHANNEL"]))
-                        print(u"\t> BBcommon: {}".format(_u["SY_BB_COMMON"]))
-                        print("\t> InfoType: {}".format(type_info[_u["SY_INFOTYPE"]]))
-                        print(u"\t> Abstrace: {}".format(_u["IR_ABSTRACT"]))
-                        print(u"\t> Content:\n{}".format(_u["IR_CONTENT"].replace("\n", "^").replace("\r", "")))
+                        print("\t> RID: {}".format(_u["RID"]))
+                        print("\t> UrlTime: {}".format(_u["IR_URLTIME"]))
+                        print("\t> Url: {}".format(_u["IR_URLNAME"]))
                         print("\t----")
 
                 print("*" * 8)
 
         time.sleep(5)
 
+    # 更新图数据库
+    put2db.main()
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     main()
 
 
